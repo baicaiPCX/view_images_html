@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"></html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <script src="../static/js/jquery.min.js"></script>
+        <script src="../static/js/toastr.min.js"></script>
+        <style>
+            .divimg{float:left;width:500px;height:500px;border: 1px solid #F00}
+            .divform{float:down;width:500px;height:500px;border: 1px solid #F00}
+            img{
+                max-width: 100%;
+                max-height: 100%;
+                position: relative;
+                top: 0%;
+                left: 0%;
+                transform: translate(0%,0%);
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="divimg">
+            <img id="vis_input" src=""  alt="" />
+        </div>
+
+        <div class="divimg">
+            <img id="vis_output" src=""  alt="" />
+        </div>
+
+        <div class="divform">
+            <iframe name="formsubmit" style="display:none;" ></iframe>
+            <form method="POST" action="/upload" enctype="multipart/form-data" target="formsubmit">
+                <input type="button" value="上传正脸" onclick=select_image() >
+                <input type="file" name="file" id="file" onchange="getFile(value)" style="display: none;">
+                <input type="submit" id="submit" name="submit" style="display: none;" >
+                <input type="button" value="开始正畸" onclick=get_result() >
+                <a href=""></a>
+            </form><hr>
+        </div>
+
+        <script>
+            function select_image(){
+                $("input[name=\'file\']").click();
+            }
+
+            //获取file文件的访问地址
+            function getFileUrl(file) {
+                            var url;
+                            var agent = navigator.userAgent;
+                            if (agent.indexOf("MSIE") >= 1 || agent.indexOf("NET")!=-1) {
+                                url = window.URL.createObjectURL(file);
+                            } else if (agent.indexOf("Firefox") > 0) {
+                                url = window.URL.createObjectURL(file);
+                            } else if (agent.indexOf("Chrome") > 0) {
+                                url =window.webkitURL.createObjectURL(file);
+                            }
+                            return url;
+            }
+
+            function getFile(value){
+                var file=document.getElementById('file').files[0];
+
+                var url = getFileUrl(file);
+
+                var imgObj = new Image();
+                imgObj.src = url;
+                imgObj.onload = function () {
+                     document.getElementById('vis_input').src=url;
+                 }
+
+                 $("input[name=\'submit\']").click();
+            }
+
+            function vis_base64(data){
+                document.getElementById('vis_output').src = "data:image/jpeg;base64,"+data;
+            }
+
+            function get_result(){
+                $.ajax({
+                    url:'/get_result',
+                    type:'GET',
+                    success:function(result){
+                        len_result = result.length;
+                        if(len_result>0){
+                            vis_base64(result[0]);
+                        }
+                    },
+                    error:function(){
+                        alert("失败");
+                    }
+                });
+        }
+
+        </script>
+
+    </body>
+
+</html>
